@@ -12,7 +12,7 @@ SRCS_BONUS =	ft_list_size.s \
 				ft_atoi_base.s
 
 NAME = libasm.a
-EXEC = ./a.out
+EXEC = ./prog
 
 OBJS = $(SRCS:.s=.o)
 OBJS_BONUS = $(SRCS_BONUS:.s=.o)
@@ -20,17 +20,16 @@ OBJS_BONUS = $(SRCS_BONUS:.s=.o)
 INC_DIR = includes/
 HEADER_PATH = -I $(INC_DIR)
 
-CC = gcc
-NASM = nasm
+CC = clang
 LIB_FLAGS = -L. -lasm
-LINUX_64_FLAGS = $(NASM) -f elf64 -o
-CFLAGS = -g -Wall -Wextra -Werror -no-pie -fstack-protector
+LINUX_64_FLAGS = nasm -f elf64
+CFLAGS = -g -Wall -Wextra -Werror
 
 all : $(NAME)
 
 %.o : %.s
 	@echo "Compiling assembly files into object format..." $<
-	$(LINUX_64_FLAGS) $@ $<
+	$(LINUX_64_FLAGS) $< -o $@
 
 $(NAME): $(OBJS)
 	@echo "Mandatory"
@@ -43,10 +42,10 @@ bonus: $(OBJS) $(OBJS_BONUS)
 	ar -rcs $(NAME) $(OBJS) $(OBJS_BONUS)
 
 test: $(NAME)
-	$(CC) $(CFLAGS) $(HEADER_PATH) main.c $(LIB_FLAGS)
+	$(CC) $(CFLAGS) main.c $(HEADER_PATH) $(LIB_FLAGS) -o $(EXEC)
 
 test_bonus: bonus
-	$(CC) $(CFLAGS) $(HEADER_PATH) main_bonus.c $(LIB_FLAGS)
+	$(CC) $(CFLAGS) main_bonus.c $(HEADER_PATH) $(LIB_FLAGS) -o $(EXEC)
 
 clean:
 	@echo "Cleaning..."
