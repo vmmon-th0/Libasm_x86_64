@@ -1,7 +1,7 @@
 
   
 
-# Libasm project (readme W.I.P. ⚠️)
+# Libasm Project
 
   
 
@@ -22,7 +22,7 @@ size_t		ft_strlen(char* str);
 char*		ft_strcpy(char* dst, char* src);
 ssize_t		ft_write(int fd, const void*, size_t);
 ssize_t		ft_read(int fd, void*, size_t);
-int			ft_strcmp(const char* s1, const char* s2);
+int		ft_strcmp(const char* s1, const char* s2);
 char*		ft_strdup(const char* s);
 ```
 
@@ -33,9 +33,9 @@ char*		ft_strdup(const char* s);
   
 
 ```c
-int		ft_list_size(t_list *begin_list);
+int	ft_list_size(t_list *begin_list);
 void	ft_list_sort(t_list **begin_list,  int  (*cmp)());
-int		ft_atoi_base(char *str, char *base);
+int	ft_atoi_base(char *str, char *base);
 void	ft_list_push_front(t_list **begin_list, void *data);
 void	ft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)(), void (*free_fct)(void *));
 ```
@@ -132,8 +132,8 @@ section .text
 main:
 	push rbp
 	mov rbp, rsp
-	mov DWORD [rbp -  0x04],  0x01
-	sal DWORD [rbp -  0x04],  0x08
+	mov DWORD [rbp -  0x04], 0x01
+	sal DWORD [rbp -  0x04], 0x08
 	mov eax,  0x00
 	pop rbp
 	ret
@@ -239,13 +239,14 @@ section .text
 hello_world:
 	push rbp
 	mov rbp, rsp
-	mov rax,  0x01
-	mov rdi,  0x01
-	mov rsi, msg
+	mov rax, 0x01
 	mov rdx, len
+	mov rsi, msg
+	mov rdi, 0x01
 	syscall
 
 .return
+	mov rsp, rbp
 	pop rbp
 	ret
 ```
@@ -256,7 +257,6 @@ hello_world:
 
 So when i call the function hello_world(), we will start from the "**hello_world label:**".
 
-  
 
 You can see within hello_world what is called a ***prologue***:
 
@@ -269,6 +269,10 @@ mov 	rbp, rsp
 And in the local label .return the ***epilogue***:
 
 ```
+mov	rsp, rbp
+; or
+sub	rsp, ALLOCATED_BYTES
+
 pop 	rbp
 ```
   
@@ -283,16 +287,52 @@ To understand what a prologue & epilogue is, one must understand the usefulness 
 
 Basically, see the rbp, as the beginning of the scope of a function & a reference, this reference which is in fact an address in memory, will be used to access local data & the rsp as the witness of the last element allocated on the stack.
 
-When I push rbp, on the stack I save the old rbp, because at function input, it still holds the old base pointer.
-As stated, RSP always points to the last allocated element on the stack, so when I push rbp, I modify rsp accordingly  (see ***prologue***), by doing this, rbp has the start of the current stack frame as its reference point, at this stage rbp == rsp, rsp will be != rbp, when I would allocate data on the stack.
+When I push on rbp, on the stack, I save the old rbp, because at the entrance of the function, it still contains the old base pointer of the calling function.
+
+As stated, RSP always points to the last allocated element on the stack, it is said to point to the top of the stack, don't get confused, the stack grows downwards, so the top of a stack frame of 0 a -32 will be -32.
+So when I push rbp onto the stack, I modify rsp accordingly.
+Let's say that initially I'm at 0, if I push rbp, I'm at -8, because an address is worth 8 bytes.
+
+Tell yourself that a push instruction decrements the stack pointer by the number of bytes I want to store on the stack, in our case, by pushing rbp, we decrement by 8 bytes before assigning the new data which is the base pointer.
+
+
+SO :
+```c
+push rbp
+
+; is the same as
+
+sub rsp, 8
+mov QWORD [rsp], rbp
+```
+QWORD indicates this operand describes an address of quad-word size, in Intel's x86 family of processors this means 8 bytes.
+
+Then once rbp is pushed the stack, we must indicate a new value to rbp which serves as our base pointer, we will give the value of rsp, since we have not allocated local variables or other spaces which are useful in our stack frame, rsp currently points to the beginning of the stack frame.
+
+This is what we call the prologue, this is what we use to initialize the beginning of our stack frame.
+
+Then we have what is called the epilogue, it simply serves to revert these processes.
 
 ![alt text](https://eli.thegreenplace.net/images/2011/08/x64_frame_nonleaf.png  "Title")
 
+Then we can observe this part of the code :
 
-# ⚠️ README WIP ⚠️
+```c
+mov rax, 0x01
+mov rdx, len
+mov rsi, msg
+mov rdi, 0x01
+syscall
+```
 
+The System V Application Binary Interface convention stipulates that to perform a syscall we must inject its identifier into the rax register, then rdi serves as the first argument rsi of the second and rdx of the third.
+
+Here we will perform a sys_write, rdi contains the standard output, rsi the contents of the string, and rdx the length.
+So this program is a hello world, indeed python is more efficient for this kind of operations. x)
 
   ## ..:: CHEATSHEET ::..
+
+  https://web.stanford.edu/class/cs107/resources/x86-64-reference.pdf
 
 ### System Call Inputs by Register
 
@@ -309,8 +349,6 @@ As stated, RSP always points to the last allocated element on the stack, so when
   
 
 ### System Call List
-
-  
 
 |syscall| ID | arg1 | arg2 | arg3| arg4| arg5 | arg 6
 |--|--|--|--|--|--|--|--|
