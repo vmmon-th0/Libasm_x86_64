@@ -285,6 +285,8 @@ To understand what a prologue & epilogue is, one must understand the usefulness 
 
 **RSP = STACK POINTER** -> This register points to the end of the lastest element allocated on the stack, during a program it will be incremented as well as decremented.
 
+![alt text](https://eli.thegreenplace.net/images/2011/08/x64_frame_nonleaf.png  "Title")
+
 Basically, see the rbp, as the beginning of the scope of a function & a reference, this reference which is in fact an address in memory, will be used to access local data & the rsp as the witness of the last element allocated on the stack.
 
 When I push on rbp, on the stack, I save the old rbp, because at the entrance of the function, it still contains the old base pointer of the calling function.
@@ -312,8 +314,6 @@ Then once rbp is pushed the stack, we must indicate a new value to rbp which ser
 This is what we call the prologue, this is what we use to initialize the beginning of our stack frame.
 
 Then we have what is called the epilogue, it simply serves to revert these processes.
-
-![alt text](https://eli.thegreenplace.net/images/2011/08/x64_frame_nonleaf.png  "Title")
 
 Then we can observe this part of the code :
 
