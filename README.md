@@ -117,7 +117,7 @@ First of all, what is the assembly language & what is the assembler ?
 
 - ***Assembly language*** is a low-level programming language that uses mnemonic codes to represent individual instructions that can be executed directly by the computer's CPU.
 
-- An ***assembler*** is a type of software that is used to convert assembly language code into machine language code. (**PHASE 4**)
+- An ***assembler*** is a type of software that is used to convert assembly language code into machine language code. (**PHASE 3**)
 
   
 
